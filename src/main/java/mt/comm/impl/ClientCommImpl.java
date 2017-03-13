@@ -28,7 +28,7 @@ public class ClientCommImpl implements ClientComm {
 	public ClientCommImpl() {
 		super();
 	}
-
+//
 	@Override
 	public void connect(final String host, final String nickname) throws UnknownHostException, IOException {
 		clientMessages = new ArrayBlockingQueue<>(CommUtils.BLOCKING_QUEUE_CAPACITY);

@@ -183,6 +183,8 @@ public class MicroServerTest {
 		verify(serverComm, atLeastOnce()).sendError(msg1.getSenderNickname(), "The user " + msg1.getSenderNickname() + " is already connected.");
 	}
 	
+	
+	
 //	@Test
 //	public void testProcessUserDisconnected() throws Exception {		
 //		when(serverComm.getNextMessage()).thenReturn(msg1).thenReturn(msg2).thenReturn(msg3).thenReturn(msg4).thenReturn(msg8).thenReturn(msg9).thenReturn(msg10).thenReturn(msg5).thenReturn(msg6).thenReturn(null);

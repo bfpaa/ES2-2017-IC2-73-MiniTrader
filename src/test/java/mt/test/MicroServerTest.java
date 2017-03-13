@@ -183,7 +183,7 @@ public class MicroServerTest {
 		verify(serverComm, atLeastOnce()).sendError(msg1.getSenderNickname(), "The user " + msg1.getSenderNickname() + " is already connected.");
 	}
 	
-	//ola grupo
+	
 	
 //	@Test
 //	public void testProcessUserDisconnected() throws Exception {		

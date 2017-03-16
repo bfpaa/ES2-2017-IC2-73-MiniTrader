@@ -8,6 +8,6 @@ Duarte Almeida - 69309 -> dsba
 (iii) 
 Status: A simple XML Processer class has been added (not yet tested).
 
-Link video: https://www.youtube.com/watch?v=9MgX9GkW7Ac
+Link video: https://youtu.be/VAJMIPKC590
 
 

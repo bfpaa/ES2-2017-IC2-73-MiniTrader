@@ -104,6 +104,7 @@ public class MicroServer implements MicroTraderServer {
 							msg.getOrder().setServerOrderID(id++);
 						}
 						notifyAllClients(msg.getOrder());
+						
 						processNewOrder(msg);
 					} catch (ServerException e) {
 						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
@@ -219,11 +220,13 @@ public class MicroServer implements MicroTraderServer {
 
 		Order o = msg.getOrder();
 		
+		isLegal(o);
 		// save the order on map
 		saveOrder(o);
 
 		// if is buy order
 		if (o.isBuyOrder()) {
+			
 			processBuy(msg.getOrder());
 		}
 		
@@ -241,6 +244,27 @@ public class MicroServer implements MicroTraderServer {
 		// reset the set of changed orders
 		updatedOrders = new HashSet<>();
 
+	}
+	
+	private void isLegal (Order order) throws ServerException{
+		if (order.isSellOrder()){
+		
+			Set<Order> orders = orderMap.get(order.getNickname());
+			for (Order o: orders){
+				if(o.isBuyOrder() && order.getStock().equals(o.getStock())){
+					throw new ServerException ("Clients are not allowed to issue sell orders for their own buy orders");
+				}
+			}
+		}
+		else if(order.isBuyOrder()){
+			Set<Order> orders = orderMap.get(order.getNickname());
+			for (Order o: orders){
+				if(o.isSellOrder() && order.getStock().equals(o.getStock())){
+					throw new ServerException ("Clients are not allowed to issue buy orders for their own sell orders");
+				}
+			}
+		}
+		
 	}
 	
 	/**

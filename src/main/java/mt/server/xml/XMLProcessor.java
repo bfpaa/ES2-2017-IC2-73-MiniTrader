@@ -57,9 +57,9 @@ public class XMLProcessor {
         
      // Create new element Customer
         
-//        Element newElementCustomer = doc.createElement("Customer");
-////        newElementCustomer.setTextContent(order.getNickname()); 
-////        newElementOrder.appendChild(newElementCustomer);
+        Element newElementCustomer = doc.createElement("Customer");
+        newElementCustomer.setTextContent(order.getNickname()); 
+        newElementOrder.appendChild(newElementCustomer);
         
         Node n = doc.getDocumentElement();
         n.appendChild(newElementOrder);

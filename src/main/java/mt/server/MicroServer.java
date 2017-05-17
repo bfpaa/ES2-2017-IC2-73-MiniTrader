@@ -248,7 +248,6 @@ public class MicroServer implements MicroTraderServer {
 	
 	private void isLegal (Order order) throws ServerException{
 		if (order.isSellOrder()){
-		
 			Set<Order> orders = orderMap.get(order.getNickname());
 			for (Order o: orders){
 				if(o.isBuyOrder() && order.getStock().equals(o.getStock())){
@@ -264,7 +263,9 @@ public class MicroServer implements MicroTraderServer {
 				}
 			}
 		}
-		
+		if(moreThanFiveUnfulfilledOrders(order.getNickname())){
+			throw new ServerException ("You cannot have more than 5 unfulfilled orders");
+		}
 	}
 	
 	/**
@@ -388,6 +389,14 @@ public class MicroServer implements MicroTraderServer {
 				}
 			}
 		}
+	}
+	
+	private boolean moreThanFiveUnfulfilledOrders(String s){
+		if(orderMap.containsKey(s)){
+			Set<Order> orders = orderMap.get(s);
+			return orders.size() >= 2;
+		}else return false;
+		
 	}
 
 }

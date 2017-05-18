@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import mt.Order;
 import mt.comm.ServerComm;
 import mt.comm.ServerSideMessage;
@@ -30,7 +32,7 @@ import mt.filter.AnalyticsFilter;
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
-		ServerComm serverComm = new AnalyticsFilter(new ServerCommImpl());
+		ServerComm serverComm = new ServerCommImpl();
 		MicroTraderServer server = new MicroServer();
 		server.start(serverComm);
 	}
@@ -102,14 +104,13 @@ public class MicroServer implements MicroTraderServer {
 						verifyUserConnected(msg);
 						
 						processNewOrder(msg);
-						if(msg.getOrder().getServerOrderID() == EMPTY){
-							msg.getOrder().setServerOrderID(id++);
-						}
+						
 						notifyAllClients(msg.getOrder());
 						
 						
 					} catch (ServerException e) {
-						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						//serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						JOptionPane.showMessageDialog(null, e.getMessage());
 					}
 					break;
 				default:
@@ -247,7 +248,13 @@ public class MicroServer implements MicroTraderServer {
 		updatedOrders = new HashSet<>();
 
 	}
-	
+	/**
+	 * Evaluate an order according to the business rules applied and send an exception
+	 * 
+	 * @param order 
+	 * 				the order to evaluate
+	 * @throws ServerException according to the broken business rule
+	 */
 	private void isLegal (Order order) throws ServerException{
 		if (order.isSellOrder()){
 			Set<Order> orders = orderMap.get(order.getNickname());
@@ -276,14 +283,16 @@ public class MicroServer implements MicroTraderServer {
 	}
 	
 	/**
-	 * Store the order on map
+	 * Assign ID,store the order on map
 	 * 
 	 * @param o
 	 * 			the order to be stored on map
 	 */
 	private void saveOrder(Order o) {
 		LOGGER.log(Level.INFO, "Storing the new order...");
-		
+		if(o.getServerOrderID() == EMPTY){
+			o.setServerOrderID(id++);
+		}
 		//save order on map
 		Set<Order> orders = orderMap.get(o.getNickname());
 		orders.add(o);		
@@ -398,6 +407,13 @@ public class MicroServer implements MicroTraderServer {
 		}
 	}
 	
+	/**
+	 * Check if there are 5 or more unfulfilled orders for a given nickname
+	 * 
+	 * @param s
+	 * 			user nickname
+	 * @return true if this the order set of this client has five or more unfulfilled orders, else false
+	 */
 	private boolean moreThanFiveUnfulfilledOrders(String s){
 		if(orderMap.containsKey(s)){
 			Set<Order> orders = orderMap.get(s);

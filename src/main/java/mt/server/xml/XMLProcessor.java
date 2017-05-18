@@ -39,7 +39,7 @@ public class XMLProcessor {
 	      } catch (Exception e) { e.printStackTrace(); }
 	   } 
 	
-	public void insertOrder(Order order) throws Exception {
+	public void saveOrder(Order order) throws Exception {
 		// Create new element Order with attributes
         Element newElementOrder = doc.createElement("Order");
        

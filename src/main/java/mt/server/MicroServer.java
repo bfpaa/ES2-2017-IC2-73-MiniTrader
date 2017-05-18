@@ -19,6 +19,7 @@ import mt.comm.ServerSideMessage;
 import mt.comm.impl.ServerCommImpl;
 import mt.exception.ServerException;
 import mt.filter.AnalyticsFilter;
+import mt.server.xml.XMLProcessor;
 //ll
 /**
  * MicroTraderServer implementation. This class should be responsible
@@ -34,7 +35,12 @@ public class MicroServer implements MicroTraderServer {
 		MicroTraderServer server = new MicroServer();
 		server.start(serverComm);
 	}
-
+	
+	/**
+	 * Instance of XML processing class
+	 */
+	private XMLProcessor xml;
+	
 	public static final Logger LOGGER = Logger.getLogger(MicroServer.class.getName());
 
 	/**
@@ -100,11 +106,8 @@ public class MicroServer implements MicroTraderServer {
 				case NEW_ORDER:
 					try {
 						verifyUserConnected(msg);
-						if(msg.getOrder().getServerOrderID() == EMPTY){
-							msg.getOrder().setServerOrderID(id++);
-						}
-						notifyAllClients(msg.getOrder());
 						processNewOrder(msg);
+						notifyAllClients(msg.getOrder());
 					} catch (ServerException e) {
 						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 					}
@@ -219,6 +222,8 @@ public class MicroServer implements MicroTraderServer {
 
 		Order o = msg.getOrder();
 		
+		isLegal(o);
+		
 		// save the order on map
 		saveOrder(o);
 
@@ -244,7 +249,7 @@ public class MicroServer implements MicroTraderServer {
 	}
 	
 	/**
-	 * Store the order on map
+	 * Assign ID, store the order on map and on XML file
 	 * 
 	 * @param o
 	 * 			the order to be stored on map
@@ -252,9 +257,18 @@ public class MicroServer implements MicroTraderServer {
 	private void saveOrder(Order o) {
 		LOGGER.log(Level.INFO, "Storing the new order...");
 		
+		if(o.getServerOrderID() == EMPTY){
+			o.setServerOrderID(id++);
+		}
 		//save order on map
 		Set<Order> orders = orderMap.get(o.getNickname());
 		orders.add(o);		
+		try {
+			xml.saveOrder(o);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -365,5 +379,10 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
-
+	
+	private void isLegal(Order order) throws ServerException{
+		if(order.getNumberOfUnits()<10)
+			throw new ServerException("A single order quantity (buy or sell order) can never be lower than 10 units");
+		
+	}
 }

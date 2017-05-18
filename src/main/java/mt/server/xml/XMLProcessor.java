@@ -23,12 +23,22 @@ import org.w3c.dom.NodeList;
 import mt.Order;
 
 public class XMLProcessor {
-	
+
+	/**
+	 * XML file name
+	 */
 	public static final String XMLFILE = "MicroTraderPersistence.xml";
+	
+	/**
+	 * 
+	 * Document used
+	 */
 	private Document doc;
 	
 	
-	
+	/**
+	 * Constructor
+	 */
 	public XMLProcessor() {
 		 try {	
 	         File xml = new File(XMLFILE);
@@ -39,6 +49,14 @@ public class XMLProcessor {
 	      } catch (Exception e) { e.printStackTrace(); }
 	   } 
 	
+	
+	/**
+	 * Saves the order on the XML file
+	 * 
+	 * @param order
+	 * 				order to save
+	 * @throws Exception
+	 */
 	public void saveOrder(Order order) throws Exception {
 		// Create new element Order with attributes
         Element newElementOrder = doc.createElement("Order");
@@ -66,6 +84,11 @@ public class XMLProcessor {
         saveXML();
 	}
 	
+	/**
+	 * Auxiliar method to save the alterations made to the file
+	 *
+	 * @throws Exception
+	 */
 	public void saveXML() throws Exception {
 		
 		  Transformer transformer = TransformerFactory.newInstance().newTransformer();

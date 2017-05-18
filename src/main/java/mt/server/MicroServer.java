@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import mt.Order;
 import mt.comm.ServerComm;
 import mt.comm.ServerSideMessage;
@@ -31,7 +33,7 @@ import mt.server.xml.XMLProcessor;
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
-		ServerComm serverComm = new AnalyticsFilter(new ServerCommImpl());
+		ServerComm serverComm = new ServerCommImpl();
 		MicroTraderServer server = new MicroServer();
 		server.start(serverComm);
 	}
@@ -110,7 +112,8 @@ public class MicroServer implements MicroTraderServer {
 						processNewOrder(msg);
 						notifyAllClients(msg.getOrder());
 					} catch (ServerException e) {
-						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						//serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						JOptionPane.showMessageDialog(null, e.getMessage());
 					}
 					break;
 				default:
@@ -381,6 +384,13 @@ public class MicroServer implements MicroTraderServer {
 		}
 	}
 	
+	/**
+	 * Evaluate an order according to the business rules applied and send an exception
+	 * 
+	 * @param order 
+	 * 				the order to evaluate
+	 * @throws ServerException according to the broken business rule
+	 */
 	private void isLegal(Order order) throws ServerException{
 		if(order.getNumberOfUnits()<10)
 			throw new ServerException("A single order quantity (buy or sell order) can never be lower than 10 units");

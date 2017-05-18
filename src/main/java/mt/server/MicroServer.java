@@ -100,12 +100,14 @@ public class MicroServer implements MicroTraderServer {
 				case NEW_ORDER:
 					try {
 						verifyUserConnected(msg);
+						
+						processNewOrder(msg);
 						if(msg.getOrder().getServerOrderID() == EMPTY){
 							msg.getOrder().setServerOrderID(id++);
 						}
 						notifyAllClients(msg.getOrder());
 						
-						processNewOrder(msg);
+						
 					} catch (ServerException e) {
 						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 					}
@@ -261,10 +263,15 @@ public class MicroServer implements MicroTraderServer {
 				if(o.isSellOrder() && order.getStock().equals(o.getStock())){
 					throw new ServerException ("Clients are not allowed to issue buy orders for their own sell orders");
 				}
+				
 			}
 		}
+		
 		if(moreThanFiveUnfulfilledOrders(order.getNickname())){
 			throw new ServerException ("You cannot have more than 5 unfulfilled orders");
+		}
+		if(order.getNumberOfUnits()<10){
+			throw new ServerException ("A single order quantity (buy or sell order) can never be lower than 10 units");
 		}
 	}
 	
@@ -394,7 +401,7 @@ public class MicroServer implements MicroTraderServer {
 	private boolean moreThanFiveUnfulfilledOrders(String s){
 		if(orderMap.containsKey(s)){
 			Set<Order> orders = orderMap.get(s);
-			return orders.size() >= 2;
+			return orders.size() >= 5;
 		}else return false;
 		
 	}

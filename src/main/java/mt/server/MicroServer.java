@@ -365,5 +365,20 @@ public class MicroServer implements MicroTraderServer {
 			}
 		}
 	}
+	
+	private void isLegal(Order order) throws ServerException{
+		if(moreThanFiveUnfulfilledOrders(order.getNickname()))
+			throw new ServerException("Sellers cannot have more than five sell orders unfulfilled at any time");
+		if(order.getNumberOfUnits()<10)
+			throw new ServerException("A single order quantity (buy or sell order) can never be lower than 10 units");
+	}
+	
+	private boolean moreThanFiveUnfulfilledOrders(String s){
+		if(orderMap.containsKey(s)){
+			Set<Order> orders = orderMap.get(s);
+			return orders.size() >= 5;
+		}else return false;
+		
+	}
 
 }

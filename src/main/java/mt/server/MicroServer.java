@@ -19,6 +19,7 @@ import mt.comm.ServerSideMessage;
 import mt.comm.impl.ServerCommImpl;
 import mt.exception.ServerException;
 import mt.filter.AnalyticsFilter;
+import mt.server.xml.XMLProcessor;
 //ll
 /**
  * MicroTraderServer implementation. This class should be responsible
@@ -27,6 +28,8 @@ import mt.filter.AnalyticsFilter;
  * @author Group 78
  *
  */
+
+
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
@@ -34,6 +37,11 @@ public class MicroServer implements MicroTraderServer {
 		MicroTraderServer server = new MicroServer();
 		server.start(serverComm);
 	}
+	
+	/**
+	 * Instance of the XML processing class
+	 */
+	private XMLProcessor xml;
 
 	public static final Logger LOGGER = Logger.getLogger(MicroServer.class.getName());
 
@@ -67,6 +75,7 @@ public class MicroServer implements MicroTraderServer {
 		LOGGER.log(Level.INFO, "Creating the server...");
 		orderMap = new HashMap<String, Set<Order>>();
 		updatedOrders = new HashSet<>();
+		xml = new XMLProcessor(); 
 	}
 
 	@Override
@@ -100,11 +109,12 @@ public class MicroServer implements MicroTraderServer {
 				case NEW_ORDER:
 					try {
 						verifyUserConnected(msg);
+						
+						processNewOrder(msg);
 						if(msg.getOrder().getServerOrderID() == EMPTY){
 							msg.getOrder().setServerOrderID(id++);
 						}
 						notifyAllClients(msg.getOrder());
-						processNewOrder(msg);
 					} catch (ServerException e) {
 						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
 					}
@@ -219,6 +229,7 @@ public class MicroServer implements MicroTraderServer {
 
 		Order o = msg.getOrder();
 		
+		isLegal(o);
 		// save the order on map
 		saveOrder(o);
 
@@ -254,7 +265,12 @@ public class MicroServer implements MicroTraderServer {
 		
 		//save order on map
 		Set<Order> orders = orderMap.get(o.getNickname());
-		orders.add(o);		
+		orders.add(o);	
+		try {
+			xml.saveOrder(o);
+		} catch (Exception e) {
+		}
+		
 	}
 
 	/**

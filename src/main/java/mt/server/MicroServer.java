@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.swing.JOptionPane;
+
 import mt.Order;
 import mt.comm.ServerComm;
 import mt.comm.ServerSideMessage;
@@ -33,7 +35,7 @@ import mt.server.xml.XMLProcessor;
 public class MicroServer implements MicroTraderServer {
 	
 	public static void main(String[] args) {
-		ServerComm serverComm = new AnalyticsFilter(new ServerCommImpl());
+		ServerComm serverComm = new ServerCommImpl();
 		MicroTraderServer server = new MicroServer();
 		server.start(serverComm);
 	}
@@ -111,12 +113,11 @@ public class MicroServer implements MicroTraderServer {
 						verifyUserConnected(msg);
 						
 						processNewOrder(msg);
-						if(msg.getOrder().getServerOrderID() == EMPTY){
-							msg.getOrder().setServerOrderID(id++);
-						}
+						
 						notifyAllClients(msg.getOrder());
 					} catch (ServerException e) {
-						serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						//serverComm.sendError(msg.getSenderNickname(), e.getMessage());
+						JOptionPane.showMessageDialog(null,e.getMessage());
 					}
 					break;
 				default:
@@ -255,14 +256,16 @@ public class MicroServer implements MicroTraderServer {
 	}
 	
 	/**
-	 * Store the order on map
+	 * Assign ID, store the order on map and on XML file
 	 * 
 	 * @param o
 	 * 			the order to be stored on map
 	 */
 	private void saveOrder(Order o) {
 		LOGGER.log(Level.INFO, "Storing the new order...");
-		
+		if(o.getServerOrderID() == EMPTY){
+			o.setServerOrderID(id++);
+		}
 		//save order on map
 		Set<Order> orders = orderMap.get(o.getNickname());
 		orders.add(o);	
@@ -382,14 +385,29 @@ public class MicroServer implements MicroTraderServer {
 		}
 	}
 	
+	/**
+	 * Evaluate an order according to the business rules applied and send an exception
+	 * 
+	 * @param order 
+	 * 				the order to evaluate
+	 * @throws ServerException according to the broken business rule
+	 */
 	private void isLegal(Order order) throws ServerException{
-		if(moreThanFiveUnfulfilledOrders(order.getNickname()))
+		if(fiveOrMoreUnfulfilledOrders(order.getNickname()))
 			throw new ServerException("Sellers cannot have more than five sell orders unfulfilled at any time");
 		if(order.getNumberOfUnits()<10)
 			throw new ServerException("A single order quantity (buy or sell order) can never be lower than 10 units");
 	}
 	
-	private boolean moreThanFiveUnfulfilledOrders(String s){
+	
+	/**
+	 * Check if there are 5 or more unfulfilled orders for a given nickname
+	 * 
+	 * @param s
+	 * 			user nickname
+	 * @return true if this the order set of this client has five or more unfulfilled orders, else false
+	 */
+	private boolean fiveOrMoreUnfulfilledOrders(String s){
 		if(orderMap.containsKey(s)){
 			Set<Order> orders = orderMap.get(s);
 			return orders.size() >= 5;

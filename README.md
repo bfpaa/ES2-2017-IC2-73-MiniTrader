@@ -1,6 +1,9 @@
 -ES2-2017-IC2-73
 
 -link video das 3 variantes do servidor:
+MiniTrader AS 1.1: https://www.youtube.com/watch?v=5SX_e2UKS54&feature=youtu.be
+MiniTrader EU 1.1:https://youtu.be/ydI3gzcLFnM
+MiniTrader US 1.1:https://youtu.be/HwwN-BWarBk
 
 -link para vídeo da entrega intermédia (Jenkins):
 https://youtu.be/VAJMIPKC590
